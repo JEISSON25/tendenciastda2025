@@ -31,7 +31,7 @@ class ProductView(ViewSet):
 
     def retrieve(self, request, pk=None):
         try:
-            return Response(self.product_service.get_product_by_id(pk).__dict__(), status=status.HTTP_200_OK)
+            return Response(self.product_service.get_product_by_id(pk).to_dict(), status=status.HTTP_200_OK)
         except Product.DoesNotExist:
             return Response({
                 "error": "Product not found",
@@ -41,7 +41,7 @@ class ProductView(ViewSet):
         products = self.product_service.get_all_products()
         response = []
         for product in products:
-            response.append(product.__dict__())
+            response.append(product.to_dict())
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -51,7 +51,7 @@ class ProductView(ViewSet):
             product: Product = product_request_serializer.create(product_request_serializer.data)
             product.id = pk
             product_saved: Product = self.product_service.update_product(product)
-            return Response(product_saved.__dict__(), status=status.HTTP_200_OK)
+            return Response(product_saved.to_dict(), status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
         try:

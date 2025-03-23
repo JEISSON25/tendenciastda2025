@@ -6,7 +6,7 @@ from products.serializers import ProductDataSerializer
 
 class ProductService:
     def create_product(self, product: Product) -> Product:
-        data_serializer = ProductDataSerializer(data=product.__dict__)
+        data_serializer = ProductDataSerializer(data=product.to_dict())
         if data_serializer.is_valid(raise_exception=True):
             data_serializer.save()
             data_saved = data_serializer.data
@@ -31,7 +31,7 @@ class ProductService:
     def update_product(self, product: Product) -> Product | None:
         old_product: Product = self.get_product_by_id(product.id)
         updated_product = self.get_product_to_update(old_product, product)
-        data_serializer = ProductDataSerializer(data=updated_product.__dict__())
+        data_serializer = ProductDataSerializer(data=updated_product.to_dict())
 
         if data_serializer.is_valid(raise_exception=True):
             Product.objects.bulk_update(objs=[updated_product], fields=['name', 'price', 'quantity', 'category', 'subcategory'])

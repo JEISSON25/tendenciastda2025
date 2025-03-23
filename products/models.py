@@ -14,7 +14,7 @@ class Product(models.Model):
     class Meta:
         db_table = 'products'
 
-    def __dict__(self):
+    def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
