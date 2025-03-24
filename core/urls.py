@@ -5,7 +5,7 @@ from tasks import views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
-router.register(r'proyectos', views.ProyectoViewSet)
+router.register(r'proyectos', views.ProyectoViewSet, basename='proyecto')
 router.register(r'tareas', views.TareaViewSet)
 
 urlpatterns = [

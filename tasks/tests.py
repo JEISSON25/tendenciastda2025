@@ -37,10 +37,11 @@ class ViewTestCase(TestCase):
         self.client.force_authenticate(user=self.user)
         self.proyecto_data = {'nombre': 'Proyecto Test', 'descripcion': 'Descripción'}
         self.response = self.client.post(
-            reverse('proyectos-list'),
+            '/api/proyectos/',  # Usa la URL directa
             self.proyecto_data,
             format="json"
         )
 
     def test_api_can_create_proyecto(self):
+        print("Response data:", self.response.data)  # Esto ahora está dentro del método
         self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
