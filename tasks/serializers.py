@@ -12,7 +12,7 @@ class ProyectoSerializer(serializers.ModelSerializer):
         model = Proyecto
         fields = '__all__'
         extra_kwargs = {
-            'usuario': {'required': False},  # Hace el campo opcional
+            'usuario': {'required': False}, 
             'descripcion': {'required': False, 'allow_blank': True}
         }
 

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class Proyecto(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
-    usuario = models.ForeignKey(  # <- Esta línea NO debe tener indentación adicional
+    usuario = models.ForeignKey( 
         User,
         on_delete=models.CASCADE,
         null=True,
