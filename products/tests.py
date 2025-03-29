@@ -1,10 +1,20 @@
+from decimal import Decimal
+
 from django.test import TestCase, Client
 from rest_framework import status
+
+from products.models import Product
+from products.services import ProductService
 
 
 # Create your tests here.
 
 class ProductTestCase(TestCase):
+    def __init__(self, methodName: str = "runTest"):
+        super().__init__(methodName)
+        self.product_service = ProductService()
+        self.product = Product(id=1)
+
     def setUp(self):
         self.client = Client()
 
@@ -25,17 +35,7 @@ class ProductTestCase(TestCase):
         })
         
     def test_get_product_by_id_successfully(self):
-        product = self.product_service.get_product_by_id(self.product.id)
-
-        self.assertEqual(product.id, self.product.id)
-        self.assertEqual(product.name, self.product.name)
-        self.assertEqual(product.category, self.product.category)
-        self.assertEqual(product.subcategory, self.product.subcategory)
-        self.assertEqual(product.price, self.product.price)
-        self.assertEqual(product.quantity, self.product.quantity)
-
-    def test_get_all_products_successfully(self):
-        product_2 = product.objects.create(
+        Product.objects.create(
             name="Another Product",
             category="Another Category",
             subcategory="Another Subcategory",
@@ -43,12 +43,46 @@ class ProductTestCase(TestCase):
             quantity=15
         )
 
+        product = self.product_service.get_product_by_id(self.product.id)
+
+        self.assertEqual(product.id, 1)
+        self.assertEqual(product.name, 'Another Product')
+        self.assertEqual(product.category, 'Another Category')
+        self.assertEqual(product.subcategory, 'Another Subcategory')
+        self.assertEqual(product.price, Decimal('25000.00'))
+        self.assertEqual(product.quantity, 15)
+
+    def test_get_all_products_successfully(self):
+        Product.objects.create(
+            name="Another Product",
+            category="Another Category",
+            subcategory="Another Subcategory",
+            price=25000.00,
+            quantity=15
+        )
+
+        Product.objects.create(
+            name="Another Product 2",
+            category="Another Category 2",
+            subcategory="Another Subcategory 2",
+            price=8000.00,
+            quantity=2
+        )
+
         products = self.product_service.get_all_products()
         self.assertEqual(len(products), 2)
 
     def test_update_product_successfully(self):
+        Product.objects.create(
+            name="Another Product",
+            category="Another Category",
+            subcategory="Another Subcategory",
+            price=25000.00,
+            quantity=15
+        )
+
         updated_product = Product(
-            id=self.product.id,
+            id='1',
             name="Updated Product",
             category="Updated Category",
             subcategory="Updated Subcategory",
@@ -62,7 +96,15 @@ class ProductTestCase(TestCase):
         self.assertEqual(updated_product_instance.category, "Updated Category")
 
     def test_delete_product_successfully(self):
-        product_id = self.Product.id
+        Product.objects.create(
+            name="Another Product",
+            category="Another Category",
+            subcategory="Another Subcategory",
+            price=25000.00,
+            quantity=15
+        )
+
+        product_id = self.product.id
         self.product_service.delete_product(product_id)
 
         with self.assertRaises(Product.DoesNotExist):

@@ -1,5 +1,4 @@
 from django.db.models import QuerySet
-from typing import List
 
 from products.models import Product
 from products.serializers import ProductDataSerializer
