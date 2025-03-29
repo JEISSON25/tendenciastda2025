@@ -1,2 +1,3 @@
-Codigo de proyectos de Aula
-changes tryal pull request
+Codigo de proyectos de AulaS
+
+Grupo 4 de tendencias de software.
