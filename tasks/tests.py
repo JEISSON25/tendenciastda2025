@@ -1,47 +1,25 @@
-from django.test import TestCase
+from rest_framework.test import APIClient, TestCase
 from django.contrib.auth.models import User
-from .models import Proyecto, Tarea
-from rest_framework.test import APIClient
-from rest_framework import status
-from django.urls import reverse
-import datetime
+from .models import Proyecto
 
-class ModelTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123'
-        )
-        self.proyecto = Proyecto.objects.create(
-            nombre='Proyecto Test',
-            usuario=self.user
-        )
-        self.tarea = Tarea.objects.create(
-            titulo='Tarea Test',
-            fecha_vencimiento=datetime.datetime.now() + datetime.timedelta(days=1),
-            proyecto=self.proyecto,
-            usuario=self.user
-        )
-
-    def test_model_creation(self):
-        self.assertEqual(Proyecto.objects.count(), 1)
-        self.assertEqual(Tarea.objects.count(), 1)
-
-class ViewTestCase(TestCase):
+class JWTAuthTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123'
-        )
-        self.client.force_authenticate(user=self.user)
-        self.proyecto_data = {'nombre': 'Proyecto Test', 'descripcion': 'Descripción'}
-        self.response = self.client.post(
-            '/api/proyectos/', 
-            self.proyecto_data,
-            format="json"
-        )
+        self.user = User.objects.create_user(username='jwtuser', password='12345678')
+    
+    def test_obtain_token(self):
+        response = self.client.post('/api/token/', {'username': 'jwtuser', 'password': '12345678'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('access', response.data)
 
-    def test_api_can_create_proyecto(self):
-        print("Response data:", self.response.data) 
-        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
+class PDFReportTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='pdfuser', password='123456')
+        self.client.force_authenticate(user=self.user)
+        self.proyecto = Proyecto.objects.create(nombre='PDF Proyecto', usuario=self.user)
+
+    def test_pdf_generation(self):
+        response = self.client.get(f'/api/proyectos/{self.proyecto.id}/pdf/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
