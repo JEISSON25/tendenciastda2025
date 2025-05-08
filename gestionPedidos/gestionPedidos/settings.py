@@ -39,8 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'models.pedido',
-    'models.usuario'
+    'models.producto',
+    'models.itemPedido',
+    'models.entrega',
+    'models.perfil',
+    'models.notificacion'
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
