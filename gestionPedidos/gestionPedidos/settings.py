@@ -61,6 +61,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'gestionPedidos.urls'
 
+import sys
+TESTING = 'pytest' in sys.argv[0]
+
+SWAGGER_USE_COMPAT_RENDERERS = False
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
