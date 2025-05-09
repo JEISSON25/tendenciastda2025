@@ -15,8 +15,8 @@ class Notificacion(models.Model):
     asunto = models.CharField(max_length=255)
     mensaje = models.TextField()
     fecha_envio = models.DateTimeField(auto_now_add=True)
-    enviado = models.BooleanField(default=False)  # Para rastrear si la notificación se envió exitosamente
-    # Podríamos agregar un campo para el ID del objeto relacionado (pedido, entrega, etc.) si es necesario
+    enviado = models.BooleanField(default=False)  
+    
 
     def __str__(self):
         return f"Notificación a {self.usuario_destino.username} - {self.tipo} ({self.fecha_envio})"
