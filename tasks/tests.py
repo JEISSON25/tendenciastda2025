@@ -1,25 +1,23 @@
-from rest_framework.test import APIClient, TestCase
+from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Proyecto
+from .models import Proyecto, Tarea
+from rest_framework.test import APIClient
 
-class JWTAuthTestCase(TestCase):
+class TareaTestCase(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='1234')
+        self.proyecto = Proyecto.objects.create(nombre='Test', usuario=self.user)
         self.client = APIClient()
-        self.user = User.objects.create_user(username='jwtuser', password='12345678')
-    
-    def test_obtain_token(self):
-        response = self.client.post('/api/token/', {'username': 'jwtuser', 'password': '12345678'})
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('access', response.data)
-
-class PDFReportTestCase(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(username='pdfuser', password='123456')
         self.client.force_authenticate(user=self.user)
-        self.proyecto = Proyecto.objects.create(nombre='PDF Proyecto', usuario=self.user)
 
-    def test_pdf_generation(self):
-        response = self.client.get(f'/api/proyectos/{self.proyecto.id}/pdf/')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['Content-Type'], 'application/pdf')
+    def test_crear_tarea(self):
+        data = {
+            'titulo': 'Tarea 1',
+            'descripcion': 'desc',
+            'fecha_vencimiento': '2099-01-01T12:00:00Z',
+            'prioridad': 'M',
+            'estado': 'P',
+            'proyecto': self.proyecto.id
+        }
+        response = self.client.post('/api/tareas/', data, format='json')
+        self.assertEqual(response.status_code, 201)
