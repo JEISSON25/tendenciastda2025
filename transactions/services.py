@@ -3,11 +3,17 @@ from uuid import UUID
 
 from django.db import connection
 from django.db.models import QuerySet, Sum
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.graphics.shapes import Drawing
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
 
 from clients.models import Client
 from products.models import Product
 from transactions.models import Transaction, ProductPerTransaction, Report
 from transactions.serializers import TransactionDataSerializer
+import io
+from reportlab.pdfgen import canvas
 
 
 class TransactionService:
@@ -59,6 +65,53 @@ class TransactionService:
             best_selling_product=self.get_best_selling_product(),
             selling_by_products=self.get_selling_by_products()
         )
+
+    def generate_sales_report_pdf(self):
+        report = self.generate_sales_report()
+        buffer = io.BytesIO()
+        page = canvas.Canvas(buffer)
+        page.setFont('Helvetica-Bold', 15)
+        page.drawString(100, 800, report.title)
+        page.setFont('Times-Roman', 13)
+        page.drawString(100, 760, f"Fecha de creacion: {report.created_date}")
+        page.drawString(100, 730, f"Clientes: {report.total_clients}")
+        page.drawString(100, 700, f"Productos: {report.total_products}")
+        page.drawString(100, 670, f"Numero de ventas: {report.num_sales}")
+        page.drawString(100, 640, f"Ventas totales: {report.total_sales}")
+        page.drawString(100, 610, f"Producto mas vendido: {report.best_selling_product}")
+        page.setFont('Helvetica-Bold', 15)
+        page.drawString(100, 570, "Ventas por productos")
+        data = [["Producto", "Venta total"]]
+        tabla_style = TableStyle([
+            ('BACKGROUND', (1, 1), (-2, -2), colors.green),
+            ('TEXTCOLOR', (0, 0), (1, -1), colors.black),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.gray),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.gray),
+        ])
+
+        for key, value in report.selling_by_products.items():
+            data.append([key, value])
+
+        table = Table(data)
+        table.setStyle(tabla_style)
+        table.wrapOn(page, 400, 600)
+        table.drawOn(page, 100, 490)
+
+        draw = Drawing()
+        bar = VerticalBarChart()
+        data.pop(0)
+        bar.x = 100
+        bar.y = 450
+        bar.categoryAxis.categoryNames  = [row[0] for row in data]
+        bar.data = [[float(row[1])] for row in data]
+
+        draw.add(bar)
+        draw.drawOn(page, 100, 490)
+
+        page.showPage()
+        page.save()
+        buffer.seek(0)
+        return buffer
 
     def get_total_clients(self) -> int:
         return Client.objects.count()

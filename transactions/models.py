@@ -44,6 +44,7 @@ class ProductPerTransaction(models.Model):
 class Report:
     def __init__(self, total_clients: int, total_products: int, num_sales: int, total_sales: Decimal,
                  best_selling_product: str, selling_by_products: dict[str, Decimal]):
+        self.title = "Reporte de ventas"
         self.total_clients = total_clients
         self.total_products = total_products
         self.num_sales = num_sales
@@ -54,7 +55,7 @@ class Report:
 
     def to_dict(self):
         return {
-            "title": "Reporte de ventas",
+            "title": self.title,
             "created_date": self.created_date,
             "total_clients": self.total_clients,
             "total_products": self.total_products,
