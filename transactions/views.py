@@ -1,6 +1,7 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from commons.jwt_utils import JWTUtils
@@ -111,5 +112,16 @@ class TransactionViewSet(viewsets.ViewSet):
             return Response({
                 "error": "Transaction not found",
             },status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=False, methods=['GET'], url_path='report')
+    def generate_report(self, request):
+        if 'authorization' not in request.headers:
+            return self.forbidden_response
+
+        token_info = JWTUtils.decode(request.headers['authorization'])
+        if Permissions.VIEW_TRANSACTION not in token_info['permissions']:
+            return self.forbidden_response
+
+        return Response(self.transaction_service.generate_sales_report().to_dict(), status=status.HTTP_200_OK)
 
     http_method_names = ['get', 'post', 'put', 'patch', 'delete']
