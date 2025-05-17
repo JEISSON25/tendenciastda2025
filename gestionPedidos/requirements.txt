@@ -7,4 +7,6 @@ Markdown==3.7
 PyJWT==2.9.0
 sqlparse==0.5.3
 tzdata==2025.2
+pytest==7.4.0
+pytest-django==4.5.2
 xhtml2pdf

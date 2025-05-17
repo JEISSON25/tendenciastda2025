@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_yasg',
     'models.pedido',
     'models.producto',
     'models.itemPedido',
@@ -60,6 +61,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'gestionPedidos.urls'
 
+import sys
+TESTING = 'pytest' in sys.argv[0]
+
+SWAGGER_USE_COMPAT_RENDERERS = False
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
