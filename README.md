@@ -10,3 +10,9 @@ Ejecutar preubas unitarias:
 
 1. python manage.py test --verbosity=2 (Esta es para ver a mas detalle como se ejecutaron las pruebas)
 2. python manage.py test
+
+
+
+ejecucion requirements
+
+pip install -r requirements.txt
