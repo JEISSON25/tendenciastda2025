@@ -4,7 +4,6 @@ from django.urls import path, include
 from models.pedido.views import PedidoViewSet
 from models.entrega.views import EntregaViewSet
 from models.itemPedido.views import ItemPedidoViewSet
-from models.notificacion.views import NotificacionViewSet
 from models.perfil.views import PerfilUsuarioViewSet
 from models.producto.views import ProductoViewSet
 from rest_framework_simplejwt.views import (
@@ -21,7 +20,6 @@ from rest_framework import permissions
 router = routers.DefaultRouter()
 router.register(r'entregas', EntregaViewSet, basename='entrega')
 router.register(r'items-pedido', ItemPedidoViewSet, basename='itempedido')
-router.register(r'notificaciones', NotificacionViewSet, basename='notificacion')
 router.register(r'pedidos', PedidoViewSet, basename='pedido')
 router.register(r'perfiles', PerfilUsuarioViewSet, basename='perfilusuario')
 router.register(r'productos', ProductoViewSet, basename='producto')

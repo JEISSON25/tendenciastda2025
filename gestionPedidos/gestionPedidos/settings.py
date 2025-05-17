@@ -44,8 +44,7 @@ INSTALLED_APPS = [
     'models.producto',
     'models.itemPedido',
     'models.entrega',
-    'models.perfil',
-    'models.notificacion'
+    'models.perfil'
 ]
 
 
