@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from rest_framework import status
 
@@ -10,14 +11,13 @@ from products.services import ProductService
 # Create your tests here.
 
 class ProductTestCase(TestCase):
-    def __init__(self, methodName: str = "runTest"):
-        super().__init__(methodName)
+    def setUp(self):
         self.product_service = ProductService()
         self.product = Product(id=1)
-
-    def setUp(self):
+        User.objects.create_superuser('test', 'test@gmail.com', 'testpass')
         self.client = Client()
-
+        token = self.client.post("/api/auth/login/", {"username": "test", "password": "testpass"}).json()["token"]
+        self.client = Client(headers={"authorization": token})
 
     def test_create_product_successfully(self):
         product_request: dict[str, object] = {
