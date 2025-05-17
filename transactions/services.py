@@ -1,9 +1,12 @@
+import statistics
 from decimal import Decimal
 from uuid import UUID
 
 from django.db import connection
 from django.db.models import QuerySet, Sum
+from reportlab.graphics import renderPDF
 from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.shapes import Drawing
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
@@ -23,6 +26,10 @@ class TransactionService:
         transaction.status = 'PAGADO'
         for product_per_transaction in products_per_transaction:
             product_per_transaction.transaction = transaction
+
+            if product_per_transaction.quantity > product_per_transaction.product.quantity:
+                raise Exception(f"El producto {product_per_transaction.product.name} no cuenta con suficiento stock para realizar esta transaccion")
+
             product_per_transaction.total = product_per_transaction.product.price * product_per_transaction.quantity
             transaction.total += product_per_transaction.total
 
@@ -32,6 +39,9 @@ class TransactionService:
             data_saved = data_serializer.data
             for product_per_transaction in products_per_transaction:
                 product_per_transaction.save()
+                stock = product_per_transaction.product.quantity - product_per_transaction.quantity
+                product_per_transaction.product.quantity = stock
+                Product.objects.bulk_update([product_per_transaction.product], fields=['quantity'])
             return data_serializer.map_to_entity(data_saved)
 
         raise Exception("Ocurrio un error al efectuar la transaccion")
@@ -97,16 +107,25 @@ class TransactionService:
         table.wrapOn(page, 400, 600)
         table.drawOn(page, 100, 490)
 
-        draw = Drawing()
+        draw = Drawing(400, 250)
         bar = VerticalBarChart()
         data.pop(0)
-        bar.x = 100
-        bar.y = 450
         bar.categoryAxis.categoryNames  = [row[0] for row in data]
-        bar.data = [[float(row[1])] for row in data]
+        bar.data = [[float(row[1]) for row in data]]
+        bar.bars[0].fillColor = colors.darkblue
+        bar.width = 400
+        bar.height = 250
+        bar.valueAxis.valueMin = 0
+        bar.valueAxis.valueStep = 50000
+        title = Label()
+        title.setOrigin(100, 310)
+        title.setText("Ventas Por Productos")
+        title.fontSize = 14
 
         draw.add(bar)
-        draw.drawOn(page, 100, 490)
+        draw.add(title)
+        draw.save()
+        draw.drawOn(page, 100, 140)
 
         page.showPage()
         page.save()

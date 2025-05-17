@@ -34,13 +34,15 @@ class TransactionViewSet(viewsets.ViewSet):
         token_info = JWTUtils.decode(request.headers['authorization'])
         if Permissions.CREATE_TRANSACTION not in token_info['permissions']:
             return self.forbidden_response
-
-        transaction_request_serializer: TransactionRequestSerializer = TransactionRequestSerializer(data=request.data)
-        if transaction_request_serializer.is_valid(raise_exception=True):
-            transaction, products_per_transaction = transaction_request_serializer.create(transaction_request_serializer.data)
-            transaction_saved: Transaction = self.transaction_service.create_transaction(transaction, products_per_transaction)
-            transaction_serializer: TransactionDataSerializer = TransactionDataSerializer(transaction_saved)
-            return Response(transaction_serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            transaction_request_serializer: TransactionRequestSerializer = TransactionRequestSerializer(data=request.data)
+            if transaction_request_serializer.is_valid(raise_exception=True):
+                transaction, products_per_transaction = transaction_request_serializer.create(transaction_request_serializer.data)
+                transaction_saved: Transaction = self.transaction_service.create_transaction(transaction, products_per_transaction)
+                transaction_serializer: TransactionDataSerializer = TransactionDataSerializer(transaction_saved)
+                return Response(transaction_serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': e.args[0]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @swagger_auto_schema(responses={200: TransactionDataSerializer(),
                                     404: "{'error': 'Transaction not found'}"},
@@ -115,8 +117,8 @@ class TransactionViewSet(viewsets.ViewSet):
             },status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(manual_parameters=[header_param])
-    @action(detail=False, methods=['GET'], url_path='report')
-    def generate_report(self, request):
+    @action(detail=True, methods=['GET'], url_path='report')
+    def generate_report(self, request, pk=None):
         if 'authorization' not in request.headers:
             return self.forbidden_response
 
@@ -124,8 +126,14 @@ class TransactionViewSet(viewsets.ViewSet):
         if Permissions.VIEW_TRANSACTION not in token_info['permissions']:
             return self.forbidden_response
 
-        #return Response(self.transaction_service.generate_sales_report().to_dict(), status=status.HTTP_200_OK)
-        return FileResponse(self.transaction_service.generate_sales_report_pdf(),
+        if pk == "json":
+            return Response(self.transaction_service.generate_sales_report().to_dict(), status=status.HTTP_200_OK)
+
+        if pk == "pdf":
+            return FileResponse(self.transaction_service.generate_sales_report_pdf(),
                             as_attachment=True, filename="sales_report.pdf",
                             status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
     http_method_names = ['get', 'post', 'put', 'patch', 'delete']
