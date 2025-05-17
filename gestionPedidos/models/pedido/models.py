@@ -1,16 +1,20 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-# Create your models here.
-
-class  Pedido (models.Model):
-    fecha_creacion = models.DateTimeField("Fecha", auto_now_add=True)
-    direccion = models.CharField("Direccion", max_length=255)
-    descripcion= models.TextField('Descripcion', max_length=300)
-    precio_total = models.DecimalField("Total", max_digits=20, decimal_places=2)
-    estado = models.CharField("Estado Actual", max_length=20)
+class Pedido(models.Model):
+    ESTADOS_PEDIDO = [
+        ('pendiente', 'Pendiente'),
+        ('en_proceso', 'En Proceso'),
+        ('entregado', 'Entregado'),
+        ('cancelado', 'Cancelado'),
+    ]
+    cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pedidos')
+    fecha_pedido = models.DateTimeField(auto_now_add=True)
+    estado = models.CharField(max_length=20, choices=ESTADOS_PEDIDO, default='pendiente')
+    direccion_envio = models.TextField()
+    monto_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f'{self.fecha_creacion} - {self.direccion} -  {self.descripcion} - {self.precio_total} - {self.estado}'
-
+        return f"Pedido #{self.id} - {self.cliente.username}"
     
 
