@@ -3,7 +3,11 @@
 from rest_framework import viewsets
 from .models import Pedido
 from .serializers import PedidoSerializer 
-
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 from models.perfil.permissions import (
     EsAdministrador,
@@ -64,5 +68,27 @@ class PedidoViewSet(viewsets.ModelViewSet):
 
 
         return Pedido.objects.none()
+
+    @action(detail=False, methods=['get'], url_path='reporte/json')
+    def reporte_json(self, request):
+        pedidos = self.get_queryset()
+        serializer = self.get_serializer(pedidos, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='reporte/pdf')
+    def reporte_pdf(self, request):
+        pedidos = self.get_queryset()
+        template = get_template('pedido/reporte_pedidos.html')
+        html = template.render({'pedidos': pedidos})
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="reporte_pedidos.pdf"'
+        
+        pisa_status = pisa.CreatePDF(html, dest=response)
+        if pisa_status.err:
+            return HttpResponse('Error al generar el PDF', status=500)
+        return response
+
+
 
 
