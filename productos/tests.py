@@ -1,75 +1,128 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
+import pytest
+from rest_framework.test import APIClient
 from django.urls import reverse
-from django.test import TransactionTestCase
 from .models import Producto, Categoria
 
-class ProductoAPITestCase(APITestCase):
+@pytest.fixture
+def api_client():
+    return APIClient()
 
-    def setUp(self):
-        # Crear una categoría para los productos de prueba
-        self.categoria = Categoria.objects.create(nombre="Electrónica")
-        
-        # Crear un producto de prueba
-        self.producto = Producto.objects.create(
-            nombre="Laptop",
-            descripcion="Laptop de gama alta",
-            precio=1500.00,
-            categoria=self.categoria
-        )
-        
-        # URLs para las pruebas
-        self.lista_url = reverse('producto-list')
-        self.detalle_url = reverse('producto-detail', args=[self.producto.id])
+@pytest.fixture
+def crear_producto(db, crear_categoria):
+    return Producto.objects.create(
+        nombre="Laptop",
+        descripcion="Laptop de gama alta",
+        precio="1500.00",
+        categoria=crear_categoria
+    )
 
-    def tearDown(self):
-        # Limpiar todos los datos de prueba
-        Producto.objects.all().delete()
-        Categoria.objects.all().delete()
+@pytest.mark.django_db
+def test_crear_producto(api_client, crear_categoria):
+    """Prueba la creación de un producto"""
+    url = reverse('producto-list')
+    data = {
+        "nombre": "Tablet",
+        "descripcion": "Tablet de gama media",
+        "precio": "800.00",
+        "categoria": crear_categoria.id
+    }
+    response = api_client.post(url, data, format='json')
+    assert response.status_code == 201
+    assert response.data['nombre'] == data['nombre']
+    assert response.data['descripcion'] == data['descripcion']
+    assert response.data['precio'] == str(data['precio'])
+    assert response.data['categoria'] == data['categoria']
 
-    def test_lista_productos(self):
-        """Verifica que la API devuelve la lista de productos"""
-        response = self.client.get(self.lista_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['nombre'], "Laptop")
+@pytest.mark.django_db
+def test_listar_productos(api_client, crear_producto):
+    """Prueba la obtención de la lista de productos"""
+    url = reverse('producto-list')
+    response = api_client.get(url)
+    assert response.status_code == 200
+    assert response.data[0]['nombre'] == crear_producto.nombre
 
-    def test_crear_producto(self):
-        """Prueba la creación de un producto nuevo"""
-        data = {
-            "nombre": "Teléfono",
-            "descripcion": "Teléfono de última generación",
-            "precio": "800.00",
-            "categoria": self.categoria.id
-        }
-        response = self.client.post(self.lista_url, data, format='json')
-        
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Producto.objects.count(), 2)
-        self.assertEqual(Producto.objects.last().nombre, "Teléfono")
+@pytest.mark.django_db
+def test_obtener_producto(api_client, crear_producto, crear_categoria):
+    """Prueba la obtención de un producto por ID"""
+    url = reverse('producto-detail', args=[crear_producto.id])
+    response = api_client.get(url)
+    assert response.status_code == 200
+    assert response.data['nombre'] == crear_producto.nombre
+    assert response.data['descripcion'] == crear_producto.descripcion
+    assert response.data['precio'] == str(crear_producto.precio)
+    assert response.data['categoria'] == crear_categoria.id
 
-    def test_detalle_producto(self):
-        """Prueba la recuperación de un producto específico"""
-        response = self.client.get(self.detalle_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['nombre'], "Laptop")
-        self.assertEqual(float(response.data['precio']), 1500.00)
+@pytest.mark.django_db
+def test_actualizar_producto(api_client, crear_producto, crear_categoria):
+    url = reverse('producto-detail', args=[crear_producto.id])
+    data = {
+        "nombre": "Laptop Actualizada",
+        "descripcion": "Laptop de gama alta actualizada",
+        "precio": "1600.00",
+        "categoria": crear_categoria.id
+    }
+    response = api_client.put(url, data, format='json')
+    assert response.status_code == 200
+    assert response.data['nombre'] == data['nombre']
+    assert response.data['descripcion'] == data['descripcion']
+    assert response.data['precio'] == str(data['precio'])
+    assert response.data['categoria'] == data['categoria']
 
-    def test_actualizar_producto(self):
-        """Prueba la actualización de un producto"""
-        data = {
-            "nombre": "Laptop Pro",
-            "descripcion": "Laptop de gama alta mejorada",
-            "precio": "1700.00",
-            "categoria": self.categoria.id
-        }
-        response = self.client.put(self.detalle_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.producto.refresh_from_db()
-        self.assertEqual(self.producto.nombre, "Laptop Pro")
+@pytest.mark.django_db
+def test_eliminar_producto(api_client, crear_producto):
+    url = reverse('producto-detail', args=[crear_producto.id])
+    response = api_client.delete(url)
+    assert response.status_code == 204
+    assert not Producto.objects.filter(id=crear_producto.id).exists()
 
-    def test_eliminar_producto(self):
-        """Prueba la eliminación de un producto"""
-        response = self.client.delete(self.detalle_url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Producto.objects.count(), 0)
+    
+###############################################################################
+
+@pytest.fixture
+def crear_categoria(db):
+    return Categoria.objects.create(nombre="Electrónica")
+
+@pytest.mark.django_db
+def test_crear_categoria(api_client):
+    url = reverse('categoria-list')
+    data = {
+        "nombre": "Electrodomésticos"
+    }
+    response = api_client.post(url, data, format='json')
+    assert response.status_code == 201
+    assert response.data['nombre'] == data['nombre']
+
+@pytest.mark.django_db
+def test_listar_categorias(api_client, crear_categoria):
+    url = reverse('categoria-list')
+    response = api_client.get(url)
+    assert response.status_code == 200
+    assert response.data[0]['nombre'] == crear_categoria.nombre
+
+@pytest.mark.django_db
+def test_obtener_categoria(api_client, crear_categoria):
+    """Prueba la obtención de una categoría por ID"""
+    url = reverse('categoria-detail', args=[crear_categoria.id])
+    response = api_client.get(url)
+    assert response.status_code == 200
+    assert response.data['nombre'] == crear_categoria.nombre
+    assert response.data['id'] == crear_categoria.id
+
+@pytest.mark.django_db
+def test_actualizar_categoria(api_client, crear_categoria):
+    url = reverse('categoria-detail', args=[crear_categoria.id])
+    data = {
+        "nombre": "Electrodomésticos Actualizada"
+    }
+    response = api_client.put(url, data, format='json')
+    assert response.status_code == 200
+    assert response.data['nombre'] == data['nombre']
+    assert response.data['id'] == crear_categoria.id
+
+@pytest.mark.django_db
+def test_eliminar_categoria(api_client, crear_categoria):
+    """Prueba la eliminación de una categoría"""
+    url = reverse('categoria-detail', args=[crear_categoria.id])
+    response = api_client.delete(url)
+    assert response.status_code == 204
+    assert not Categoria.objects.filter(id=crear_categoria.id).exists()
