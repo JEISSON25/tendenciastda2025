@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tareas y Productividad</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>¡Bienvenido!</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="{% url 'login' %}">Iniciar sesión</a></li>
+            <li><a href="{% url 'tarea_list' %}">Mis tareas</a></li>
+            <li><a href="{% url 'proyecto_list' %}">Mis proyectos</a></li>
+        </ul>
+    </nav>
+    
+    <footer>
+        <p>&copy; 2025 - Proyecto Gestión de Tareas y Productividad</p>
+    </footer>
+</body>
+</html>

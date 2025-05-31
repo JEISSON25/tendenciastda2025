@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Detalle de proyecto{% endblock %}
+
+{% block content %}
+<h2>{{ proyecto.nombre }}</h2>
+<p><strong>Descripción:</strong> {{ proyecto.descripcion }}</p>
+<p><strong>Fecha de creación:</strong> {{ proyecto.fecha_creacion }}</p>
+
+<h3>Tareas asociadas</h3>
+<ul>
+    {% for tarea in proyecto.tarea_set.all %}
+        <li>{{ tarea.titulo }} - {{ tarea.get_estado_display }} - vence el {{ tarea.fecha_vencimiento|date:"d/m/Y" }}</li>
+    {% empty %}
+        <li>No hay tareas asociadas a este proyecto.</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'proyecto_update' proyecto.id %}">Editar</a>
+<a href="{% url 'proyecto_delete' proyecto.id %}">Eliminar</a>
+<a href="{% url 'proyecto_list' %}">Volver</a>
+<a href="{% url 'proyecto_reportes' proyecto.id %}">Ver Reportes</a>
+
+{% endblock %}

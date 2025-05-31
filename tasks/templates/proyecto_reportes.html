@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Generar Reportes{% endblock %}
+{% block content %}
+  <h2>Reportes del Proyecto</h2>
+  
+  <p><strong>Proyecto:</strong> {{ proyecto.nombre }}</p>
+  <p><strong>Descripción:</strong> {{ proyecto.descripcion }}</p>
+  <p><strong>Fecha de creación:</strong> {{ proyecto.fecha_creacion }}</p>
+
+  <div style="margin-top: 20px;">
+    <a href="/api/proyectos/{{ proyecto.id }}/reporte_json/" target="_blank">
+      <button>Generar JSON</button>
+    </a>
+
+    <a href="/api/proyectos/{{ proyecto.id }}/reporte_pdf/" target="_blank">
+      <button>Generar PDF</button>
+    </a>
+  </div>
+
+  <br>
+  <a href="{% url 'proyecto_list' %}">Volver al listado</a>
+{% endblock %}

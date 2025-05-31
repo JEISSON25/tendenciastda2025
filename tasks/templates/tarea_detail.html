@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Detalle de tarea{% endblock %}
+{% block content %}
+<h2>{{ tarea.titulo }}</h2>
+<p><strong>Descripción:</strong> {{ tarea.descripcion }}</p>
+<p><strong>Vence:</strong> {{ tarea.fecha_vencimiento }}</p>
+<p><strong>Prioridad:</strong> {{ tarea.get_prioridad_display }}</p>
+<p><strong>Estado:</strong> {{ tarea.get_estado_display }}</p>
+<p><strong>Proyecto:</strong> {{ tarea.proyecto }}</p>
+<a href="{% url 'tarea_update' tarea.id %}">Editar</a>
+<a href="{% url 'tarea_delete' tarea.id %}">Eliminar</a>
+<a href="{% url 'tarea_list' %}">Volver</a>
+{% endblock %}

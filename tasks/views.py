@@ -8,6 +8,22 @@ from reportlab.pdfgen import canvas
 from datetime import date
 from .models import Proyecto, Tarea
 from .serializers import ProyectoSerializer, TareaSerializer
+from django.shortcuts import render
+from django.views.generic import DeleteView
+from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
+
+def proyecto_reportes(request, pk):
+    proyecto = get_object_or_404(Proyecto, pk=pk)
+    return render(request, 'proyecto_reportes.html', {'proyecto': proyecto})
+
+def index(request):
+    return render(request, 'index.html')
+
+class ProyectoDeleteView(DeleteView):
+    model = Proyecto
+    template_name = 'proyecto_confirm_delete.html'
+    success_url = reverse_lazy('proyecto_list')
 
 class ProyectoViewSet(viewsets.ModelViewSet):
     queryset = Proyecto.objects.all()

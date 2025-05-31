@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar proyecto{% endblock %}
+
+{% block content %}
+<h2>¿Estás seguro de que deseas eliminar el proyecto "{{ proyecto.nombre }}"?</h2>
+<p><strong>Advertencia:</strong> Esta acción eliminará también todas las tareas asociadas a este proyecto.</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Sí, eliminar</button>
+    <a href="{% url 'proyecto_list' %}">Cancelar</a>
+</form>
+{% endblock %}

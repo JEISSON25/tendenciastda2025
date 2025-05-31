@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Lista de proyectos{% endblock %}
+{% block content %}
+<h2>Proyectos</h2>
+<a href="{% url 'proyecto_create' %}">Crear nuevo proyecto</a>
+<ul>
+    {% for proyecto in proyectos %}
+        <li>
+            <a href="{% url 'proyecto_detail' proyecto.id %}">{{ proyecto.nombre }}</a>
+            - <a href="{% url 'proyecto_update' proyecto.id %}">Editar</a>
+            - <a href="{% url 'proyecto_delete' proyecto.id %}">Eliminar</a>
+        </li>
+    {% empty %}
+        <li>No hay proyectos.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,41 @@
+:root {
+    color-scheme: light dark;
+    --bg-light: #f5f5f5;
+    --text-light: #333;
+    --primary: #007acc;
+    --footer-bg: #222;
+    --footer-text: #eee;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+header {
+    background: var(--primary);
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+main {
+    padding: 2rem;
+}
+
+ul {
+    list-style: square;
+    padding-left: 1.5rem;
+}
+
+footer {
+    margin-top: 2rem;
+    background: var(--footer-bg);
+    color: var(--footer-text);
+    text-align: center;
+    padding: 1rem;
+}
