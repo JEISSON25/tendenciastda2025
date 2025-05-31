@@ -9,6 +9,9 @@ Integrantes
 - Jhony De Jesús Camaño Fabra
 
 *Requisitos*
-- pip install django
-- pip install djangorestframework
-- pip install psycopg2
+## 🌐 Demo en línea
+
+
+Puedes ver la aplicación en funcionamiento haciendo clic en el siguiente enlace:
+
+🔗 [Ver demo en línea](https://tendenciastda2025.fly.dev/)
